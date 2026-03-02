@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kartleggingsprøve i Regning - 1. trinn</title>
-    <link rel="icon" type="image/png" href="REG.png">
-    <link rel="apple-touch-icon" href="REG.png">
     <style>
         :root { 
             --blue: #4A90E2; 
@@ -13,6 +11,7 @@
             --bg: #f0f4f8; 
             --text: #2d3748;
             --red: #e53e3e;
+            --yellow: #fff9c4;
         }
         
         body { 
@@ -36,18 +35,15 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
             padding: 40px; 
             position: relative; 
-            margin-bottom: 120px; 
+            margin-bottom: 150px; 
         }
 
-        /* Startside-spesifikk */
         #start-page { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .welcome-box { background: #ebf5fb; border: 3px solid var(--blue); border-radius: 30px; padding: 30px; margin-top: 20px; width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
         
-        /* Knapper */
         .btn-nav, .test-btn { background: var(--blue); color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
         .start-btn { background: var(--green); color: white; border: none; padding: 20px 50px; font-size: 32px; font-weight: bold; border-radius: 50px; cursor: pointer; margin-top: 10px; box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4); }
 
-        /* Lydavspiller øverst til høyre */
         .audio-wrapper { position: absolute; top: 20px; right: 20px; background: #edf2f7; padding: 10px; border-radius: 50px; z-index: 100; }
         
         .question-box { display: none; }
@@ -58,73 +54,56 @@
         .layout-flex { display: flex; flex-wrap: wrap; align-items: center; gap: 30px; justify-content: center; margin-top: 30px; }
         .img-main { max-width: 300px; border-radius: 15px; border: 2px solid #eee; }
         
-        /* Store inndatafelt for barn */
-        .input-large { width: 120px; height: 120px; font-size: 60px; text-align: center; border: 4px solid var(--blue); border-radius: 20px; outline: none; background: #fff9c4; }
-
-        /* Dra og slipp */
-        .drag-source, .q13-drag-source { 
-            min-height: 120px; border: 2px dashed #cbd5e0; padding: 15px; 
-            display: flex; gap: 15px; justify-content: center; border-radius: 15px;
-            width: 100%; box-sizing: border-box; margin-bottom: 20px; background: #f8fafc;
+        /* Store inndatafelt */
+        .input-large { 
+            width: 120px; height: 120px; font-size: 60px; text-align: center; 
+            border: 4px solid var(--blue); border-radius: 20px; outline: none; 
+            background: var(--yellow); cursor: pointer; caret-color: transparent;
         }
+        .input-large:focus { border-color: var(--green); background: white; box-shadow: 0 0 15px rgba(72,187,120,0.3); }
 
-        .drag-item { 
-            width: 90px; height: 90px; background: var(--blue); color: white; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 45px; border-radius: 15px; cursor: pointer;
-            touch-action: none; user-select: none; z-index: 100;
+        /* Tastatur-stil */
+        #custom-keyboard {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: #d1d5db; padding: 10px; border-radius: 15px;
+            display: none; grid-template-columns: repeat(5, 1fr); gap: 10px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.2); z-index: 3000;
         }
-
-        .drag-item-img {
-            width: 90px; height: 90px; border-radius: 15px; cursor: pointer;
-            touch-action: none; user-select: none;
-            object-fit: cover; border: 2px solid var(--blue); background: white;
+        .key {
+            width: 60px; height: 60px; background: white; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: bold; cursor: pointer; 
+            box-shadow: 0 4px 0 #9ca3af; user-select: none;
         }
+        .key:active { transform: translateY(2px); box-shadow: 0 2px 0 #9ca3af; }
+        .key.delete { background: #feb2b2; color: #c53030; }
 
-        .drop-target, .drop-target-large { 
-            width: 110px; height: 110px; border: 4px dashed #cbd5e0; 
-            border-radius: 20px; display: flex; align-items: center; 
-            justify-content: center; background: #fafafa; 
-        }
-
-        /* Bildekort som kan velges */
+        /* Resten av din stil beholder vi */
+        .drag-source, .q13-drag-source { min-height: 120px; border: 2px dashed #cbd5e0; padding: 15px; display: flex; gap: 15px; justify-content: center; border-radius: 15px; width: 100%; box-sizing: border-box; margin-bottom: 20px; background: #f8fafc; }
+        .drag-item { width: 90px; height: 90px; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 45px; border-radius: 15px; cursor: pointer; touch-action: none; user-select: none; z-index: 100; }
+        .drag-item-img { width: 90px; height: 90px; border-radius: 15px; cursor: pointer; touch-action: none; user-select: none; object-fit: cover; border: 2px solid var(--blue); background: white; }
+        .drop-target, .drop-target-large { width: 110px; height: 110px; border: 4px dashed #cbd5e0; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: #fafafa; }
         .img-card { border: 4px solid #edf2f7; border-radius: 20px; padding: 10px; cursor: pointer; background: white; transition: 0.2s; }
         .img-card.selected { border-color: var(--green); background: #f0fff4; transform: scale(1.05); box-shadow: 0 0 15px rgba(72,187,120,0.3); }
         .img-card img { max-width: 130px; height: auto; pointer-events: none; }
-
-        /* Tallinje */
         .number-line-container { width: 90%; position: relative; height: 120px; margin: 50px auto; touch-action: none; cursor: pointer; }
         .line-base { width: 100%; height: 6px; background: #333; position: absolute; top: 50%; border-radius: 3px; }
         .tick { position: absolute; height: 25px; width: 3px; background: #333; top: 50%; transform: translateY(-50%); }
         .tick-label { position: absolute; top: 70px; transform: translateX(-50%); font-weight: bold; font-size: 22px; }
         .arrow-pointer { position: absolute; top: -10px; font-size: 50px; transform: translateX(-50%); color: var(--red); pointer-events: none; transition: left 0.1s; }
-
-        /* Bunn-navigasjon */
-        .footer-nav { 
-            position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: white; padding: 20px 0; display: none; 
-            justify-content: center; align-items: center; gap: 10px; 
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 2000; 
-        }
-
-        .page-dot { 
-            width: 42px; height: 42px; display: flex; align-items: center; 
-            justify-content: center; border: 2px solid #ddd; border-radius: 12px; 
-            cursor: pointer; font-weight: bold; background: white; font-size: 18px;
-        }
+        .footer-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 20px 0; display: none; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 2000; }
+        .page-dot { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border: 2px solid #ddd; border-radius: 12px; cursor: pointer; font-weight: bold; background: white; font-size: 18px; }
         .page-dot.active { background: #2d3748; color: white; border-color: #2d3748; }
-
         .hidden { display: none !important; }
-        
         #feedback-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 12px; margin: 30px 0; }
     </style>
 </head>
 <body>
 
 <div id="start-page" class="container">
-    <h1 style="font-size: 38px; text-align:center; margin-bottom:10px;">Nå skal vi øve på kartleggingsprøve!</h1>
+    <h1 style="font-size: 38px;">Nå skal vi øve på kartleggingsprøve!</h1>
     <div class="welcome-box">
-        <p style="font-size: 22px; margin-top: 0;">Først må vi sjekke lyden:</p>
+        <p style="font-size: 22px;">Først må vi sjekke lyden:</p>
         <button class="test-btn" onclick="new Audio('test.mp3').play()">🔊 Trykk for å teste lyden</button>
         <button class="start-btn" onclick="startQuiz()">Jeg er klar! ▶</button>
     </div>
@@ -136,66 +115,25 @@
     </div>
 
     <div id="question-container">
-        <div class="question-box" id="q1"><h2>Oppgave 1</h2><div class="layout-flex"><img src="01.png" class="img-main"><input type="number" id="ans1" class="input-large"></div></div>
-        <div class="question-box" id="q2"><h2>Oppgave 2</h2><div class="layout-flex"><img src="02.png" class="img-main"><input type="number" id="ans2" class="input-large"></div></div>
+        <div class="question-box" id="q1"><h2>Oppgave 1</h2><div class="layout-flex"><img src="01.png" class="img-main"><input type="text" id="ans1" class="input-large" readonly></div></div>
+        <div class="question-box" id="q2"><h2>Oppgave 2</h2><div class="layout-flex"><img src="02.png" class="img-main"><input type="text" id="ans2" class="input-large" readonly></div></div>
         
-        <div class="question-box" id="q3">
-            <h2>Oppgave 3</h2>
-            <div id="q3-source" class="drag-source">
-                <div class="drag-item" id="q3_1">1</div>
-                <div class="drag-item" id="q3_2">2</div>
-                <div class="drag-item" id="q3_5">5</div>
-                <div class="drag-item" id="q3_9">9</div>
-            </div>
-            <div class="layout-flex">
-                <div class="drop-target" id="q3_d1"></div>
-                <div class="drop-target" id="q3_d2"></div>
-            </div>
-        </div>
-
-        <div class="question-box" id="q4">
-            <h2>Oppgave 4</h2>
-            <div id="q4-source" class="drag-source">
-                <div class="drag-item" id="q4_1">1</div>
-                <div class="drag-item" id="q4_3">3</div>
-                <div class="drag-item" id="q4_5">5</div>
-                <div class="drag-item" id="q4_7">7</div>
-            </div>
-            <div class="layout-flex">
-                <div class="drop-target" id="q4_d1"></div>
-                <div class="drop-target" id="q4_d2"></div>
-            </div>
-        </div>
-
+        <div class="question-box" id="q3"><h2>Oppgave 3</h2><div id="q3-source" class="drag-source"><div class="drag-item" id="q3_1">1</div><div class="drag-item" id="q3_2">2</div><div class="drag-item" id="q3_5">5</div><div class="drag-item" id="q3_9">9</div></div><div class="layout-flex"><div class="drop-target" id="q3_d1"></div><div class="drop-target" id="q3_d2"></div></div></div>
+        <div class="question-box" id="q4"><h2>Oppgave 4</h2><div id="q4-source" class="drag-source"><div class="drag-item" id="q4_1">1</div><div class="drag-item" id="q4_3">3</div><div class="drag-item" id="q4_5">5</div><div class="drag-item" id="q4_7">7</div></div><div class="layout-flex"><div class="drop-target" id="q4_d1"></div><div class="drop-target" id="q4_d2"></div></div></div>
+        
         <div class="question-box" id="q5"><h2>Oppgave 5</h2><div class="layout-flex"><img src="05.png" style="width:180px"><div id="grid5" style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px;"><div class="img-card" onclick="toggleSelection(this)"><img src="05_01.png"></div><div class="img-card" onclick="toggleSelection(this)" id="correct5_1"><img src="05_02.png"></div><div class="img-card" onclick="toggleSelection(this)"><img src="05_03.png"></div><div class="img-card" onclick="toggleSelection(this)" id="correct5_2"><img src="05_04.png"></div><div class="img-card" onclick="toggleSelection(this)"><img src="05_05.png"></div><div class="img-card" onclick="toggleSelection(this)" id="correct5_3"><img src="05_06.png"></div></div></div></div>
         <div class="question-box" id="q6"><h2>Oppgave 6</h2><div class="layout-flex"><img src="06.png" style="width:180px"><div id="grid6" style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px;"><div class="img-card" onclick="toggleSelection(this)" id="correct6_1"><img src="06_01.png"></div><div class="img-card" onclick="toggleSelection(this)"><img src="06_02.png"></div><div class="img-card" onclick="toggleSelection(this)" id="correct6_2"><img src="06_03.png"></div><div class="img-card" onclick="toggleSelection(this)" id="correct6_3"><img src="06_04.png"></div><div class="img-card" onclick="toggleSelection(this)"><img src="06_05.png"></div><div class="img-card" onclick="toggleSelection(this)" id="correct6_4"><img src="06_06.png"></div></div></div></div>
         
         <div class="question-box" id="q7"><h2>Oppgave 7</h2><img src="07.png" style="width:180px; display:block; margin:auto;"><div class="number-line-container" id="nl7"><div class="line-base"></div><div id="arrow7" class="arrow-pointer">▼</div><div id="ticks7"></div></div></div>
         <div class="question-box" id="q8"><h2>Oppgave 8</h2><img src="08.png" style="width:180px; display:block; margin:auto;"><div class="number-line-container" id="nl8"><div class="line-base"></div><div id="arrow8" class="arrow-pointer">▼</div><div id="ticks8"></div></div></div>
         
-        <div class="question-box" id="q9"><h2>Oppgave 9</h2><div class="layout-flex"><div style="font-size:70px">4 + 6 =</div><input type="number" id="ans9" class="input-large"></div></div>
-        <div class="question-box" id="q10"><h2>Oppgave 10</h2><div class="layout-flex"><div style="font-size:70px">15 + 3 =</div><input type="number" id="ans10" class="input-large"></div></div>
+        <div class="question-box" id="q9"><h2>Oppgave 9</h2><div class="layout-flex"><div style="font-size:70px">4 + 6 =</div><input type="text" id="ans9" class="input-large" readonly></div></div>
+        <div class="question-box" id="q10"><h2>Oppgave 10</h2><div class="layout-flex"><div style="font-size:70px">15 + 3 =</div><input type="text" id="ans10" class="input-large" readonly></div></div>
         
-        <div class="question-box" id="q11"><h2>Oppgave 11</h2><div class="layout-flex"><div class="drop-target" style="border:4px solid #333; font-size:45px; background:white;">10</div><input type="number" id="ans11_a" class="input-large"><div class="drop-target" style="border:4px solid #333; font-size:45px; background:white;">12</div><input type="number" id="ans11_b" class="input-large"></div></div>
-        <div class="question-box" id="q12"><h2>Oppgave 12</h2><div class="layout-flex"><input type="number" id="ans12_a" class="input-large"><input type="number" id="ans12_b" class="input-large"><div class="drop-target" style="border:4px solid #333; font-size:45px; background:white;">16</div><div class="drop-target" style="border:4px solid #333; font-size:45px; background:white;">17</div></div></div>
+        <div class="question-box" id="q11"><h2>Oppgave 11</h2><div class="layout-flex"><div class="drop-target" style="border:4px solid #333; font-size:45px; background:white;">10</div><input type="text" id="ans11_a" class="input-large" readonly><div class="drop-target" style="border:4px solid #333; font-size:45px; background:white;">12</div><input type="text" id="ans11_b" class="input-large" readonly></div></div>
+        <div class="question-box" id="q12"><h2>Oppgave 12</h2><div class="layout-flex"><input type="text" id="ans12_a" class="input-large" readonly><input type="text" id="ans12_b" class="input-large" readonly><div class="drop-target" style="border:4px solid #333; font-size:45px; background:white;">16</div><div class="drop-target" style="border:4px solid #333; font-size:45px; background:white;">17</div></div></div>
         
-        <div class="question-box" id="q13">
-            <h2>Oppgave 13</h2>
-            <div id="q13-source" class="q13-drag-source">
-                <img src="13_01.png" class="drag-item-img" id="i13_1">
-                <img src="13_02.png" class="drag-item-img" id="i13_2">
-                <img src="13_03.png" class="drag-item-img" id="i13_3">
-                <img src="13_04.png" class="drag-item-img" id="i13_4">
-            </div>
-            <div class="layout-flex">
-                <img src="13.png" style="width:110px; height:110px; border:3px solid #333; border-radius:15px;">
-                <div class="drop-target-large" id="d13_1"></div>
-                <div class="drop-target-large" id="d13_2"></div>
-                <div class="drop-target-large" id="d13_3"></div>
-                <div class="drop-target-large" id="d13_4"></div>
-            </div>
-        </div>
-
+        <div class="question-box" id="q13"><h2>Oppgave 13</h2><div id="q13-source" class="q13-drag-source"><img src="13_01.png" class="drag-item-img" id="i13_1"><img src="13_02.png" class="drag-item-img" id="i13_2"><img src="13_03.png" class="drag-item-img" id="i13_3"><img src="13_04.png" class="drag-item-img" id="i13_4"></div><div class="layout-flex"><img src="13.png" style="width:110px; height:110px; border:3px solid #333; border-radius:15px;"><div class="drop-target-large" id="d13_1"></div><div class="drop-target-large" id="d13_2"></div><div class="drop-target-large" id="d13_3"></div><div class="drop-target-large" id="d13_4"></div></div></div>
         <div class="question-box" id="q14"><h2>Oppgave 14</h2><div id="grid14" style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px;"><div class="img-card" onclick="toggleSelection(this)" id="correct14_1"><img src="14_01.png"></div><div class="img-card" onclick="toggleSelection(this)"><img src="14_02.png"></div><div class="img-card" onclick="toggleSelection(this)"><img src="14_03.png"></div><div class="img-card" onclick="toggleSelection(this)"><img src="14_04.png"></div><div class="img-card" onclick="toggleSelection(this)" id="correct14_5"><img src="14_05.png"></div><div class="img-card" onclick="toggleSelection(this)" id="correct14_6"><img src="14_06.png"></div></div></div>
     </div>
 
@@ -205,6 +143,20 @@
         <div id="feedback-list"></div>
         <button class="start-btn" onclick="location.reload()">Start på nytt</button>
     </div>
+</div>
+
+<div id="custom-keyboard">
+    <div class="key" onclick="typeNum('1')">1</div>
+    <div class="key" onclick="typeNum('2')">2</div>
+    <div class="key" onclick="typeNum('3')">3</div>
+    <div class="key" onclick="typeNum('4')">4</div>
+    <div class="key" onclick="typeNum('5')">5</div>
+    <div class="key" onclick="typeNum('6')">6</div>
+    <div class="key" onclick="typeNum('7')">7</div>
+    <div class="key" onclick="typeNum('8')">8</div>
+    <div class="key" onclick="typeNum('9')">9</div>
+    <div class="key" onclick="typeNum('0')">0</div>
+    <div class="key delete" style="grid-column: span 5; width: 100%;" onclick="typeNum('del')">Slett</div>
 </div>
 
 <div class="footer-nav" id="main-nav">
@@ -218,6 +170,7 @@
     let currentPage = 1;
     const totalPages = 14;
     const arrowPositions = { 7: 0, 8: 0 };
+    let activeInput = null;
 
     function startQuiz() {
         document.getElementById('start-page').classList.add('hidden');
@@ -239,7 +192,31 @@
         createTicks(8, 10, [0, 10]);
         setupNumberLineTouch();
         setupDragAndDrop();
+        setupKeyboardInput();
         goToPage(1);
+    }
+
+    // TASTATUR-LOGIKK
+    function setupKeyboardInput() {
+        const inputs = document.querySelectorAll('.input-large');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                activeInput = input;
+                document.getElementById('custom-keyboard').style.display = 'grid';
+            });
+        });
+    }
+
+    function typeNum(val) {
+        if (!activeInput) return;
+        if (val === 'del') {
+            activeInput.value = '';
+        } else {
+            // Begrens til 2 siffer for 1. trinn-oppgaver
+            if (activeInput.value.length < 2) {
+                activeInput.value += val;
+            }
+        }
     }
 
     function goToPage(n) {
@@ -249,6 +226,14 @@
         document.getElementById('q' + n).classList.add('active');
         document.getElementById('dot-' + n).classList.add('active');
         
+        // Vis tastatur kun på spesifikke oppgaver
+        const keyboardPages = [1, 2, 9, 10, 11, 12];
+        document.getElementById('custom-keyboard').style.display = keyboardPages.includes(n) ? 'grid' : 'none';
+        
+        // Sett fokus på første input-felt hvis det finnes
+        const firstInput = document.querySelector('#q' + n + ' .input-large');
+        if (firstInput) firstInput.focus();
+
         const audio = document.getElementById('audio-player');
         audio.src = (n < 10 ? '0' + n : n) + '.mp3';
         
@@ -257,24 +242,19 @@
         window.scrollTo(0,0);
     }
 
+    // Beholder resten av dine originale funksjoner uendret
     function changePage(step) { goToPage(currentPage + step); }
-
     function createTicks(id, max, labels) {
-        const container = document.getElementById('ticks' + id);
-        container.innerHTML = '';
+        const container = document.getElementById('ticks' + id); container.innerHTML = '';
         for (let i = 0; i <= max; i++) {
-            const tick = document.createElement('div');
-            tick.className = 'tick'; tick.style.left = (i / max * 100) + '%';
+            const tick = document.createElement('div'); tick.className = 'tick'; tick.style.left = (i / max * 100) + '%';
             if (labels.includes(i)) {
-                const label = document.createElement('div');
-                label.className = 'tick-label'; label.innerText = i;
-                label.style.left = (i / max * 100) + '%';
-                container.appendChild(label);
+                const label = document.createElement('div'); label.className = 'tick-label'; label.innerText = i;
+                label.style.left = (i / max * 100) + '%'; container.appendChild(label);
             }
             container.appendChild(tick);
         }
     }
-
     function setupNumberLineTouch() {
         [7, 8].forEach(id => {
             const el = document.getElementById('nl' + id);
@@ -290,42 +270,24 @@
             el.addEventListener('mousedown', handle);
         });
     }
-
     function setupDragAndDrop() {
         const draggables = document.querySelectorAll('.drag-item, .drag-item-img');
         draggables.forEach(item => {
             let active = false;
-            
-            const start = (e) => { 
-                active = true; 
-                item.style.position = 'fixed'; 
-                item.style.zIndex = '1000';
-                move(e); 
-            };
-
+            const start = (e) => { active = true; item.style.position = 'fixed'; item.style.zIndex = '1000'; move(e); };
             const move = (e) => {
                 if (!active) return;
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                item.style.left = (clientX - 45) + 'px'; 
-                item.style.top = (clientY - 45) + 'px';
+                item.style.left = (clientX - 45) + 'px'; item.style.top = (clientY - 45) + 'px';
             };
-
             const end = (e) => {
-                if (!active) return; 
-                active = false; 
-                item.style.display = 'none';
-                
+                if (!active) return; active = false; item.style.display = 'none';
                 const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
                 const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
                 const target = document.elementFromPoint(clientX, clientY)?.closest('.drop-target, .drop-target-large, .drag-source, .q13-drag-source');
-                
-                item.style.display = 'flex';
-                if (item.tagName === 'IMG') item.style.display = 'block';
-                
-                item.style.position = 'static';
-                item.style.zIndex = '100';
-
+                item.style.display = (item.tagName === 'IMG') ? 'block' : 'flex';
+                item.style.position = 'static'; item.style.zIndex = '100';
                 if (target) {
                     if ((target.classList.contains('drop-target') || target.classList.contains('drop-target-large')) && target.children.length > 0) {
                         const existing = target.children[0];
@@ -338,7 +300,6 @@
                     backTo.appendChild(item);
                 }
             };
-
             item.addEventListener('touchstart', (e) => { e.preventDefault(); start(e); });
             item.addEventListener('touchmove', (e) => { e.preventDefault(); move(e); });
             item.addEventListener('touchend', end);
@@ -347,13 +308,11 @@
             window.addEventListener('mouseup', end);
         });
     }
-
     function toggleSelection(el) { el.classList.toggle('selected'); }
-
     function finishTest() {
+        document.getElementById('custom-keyboard').style.display = 'none';
         let score = 0; let results = [];
         const check = (isCorrect) => { results.push(isCorrect); if (isCorrect) score++; };
-
         check(document.getElementById('ans1').value == 9);
         check(document.getElementById('ans2').value == 12);
         const v3 = Array.from(document.querySelectorAll('#q3_d1 div, #q3_d2 div')).map(e => e.innerText);
@@ -362,8 +321,7 @@
         check(v4.includes('3') && v4.includes('7'));
         check(document.querySelectorAll('#grid5 .selected').length === 3 && document.querySelectorAll('#correct5_1.selected, #correct5_2.selected, #correct5_3.selected').length === 3);
         check(document.querySelectorAll('#grid6 .selected').length === 4 && document.querySelectorAll('#correct6_1.selected, #correct6_2.selected, #correct6_3.selected, #correct6_4.selected').length === 4);
-        check(arrowPositions[7] === 5);
-        check(arrowPositions[8] === 4);
+        check(arrowPositions[7] === 5); check(arrowPositions[8] === 4);
         check(document.getElementById('ans9').value == 10);
         check(document.getElementById('ans10').value == 18);
         check(document.getElementById('ans11_a').value == 11 && document.getElementById('ans11_b').value == 13);
@@ -371,11 +329,9 @@
         const q13c = document.getElementById('d13_1').firstChild?.id === 'i13_3' && document.getElementById('d13_2').firstChild?.id === 'i13_2' && document.getElementById('d13_3').firstChild?.id === 'i13_4' && document.getElementById('d13_4').firstChild?.id === 'i13_1';
         check(q13c);
         check(document.querySelectorAll('#grid14 .selected').length === 3 && document.querySelectorAll('#correct14_1.selected, #correct14_5.selected, #correct14_6.selected').length === 3);
-
         document.getElementById('question-container').classList.add('hidden');
         document.querySelector('.audio-wrapper').classList.add('hidden');
         document.getElementById('main-nav').classList.add('hidden');
-        
         const feedbackList = document.getElementById('feedback-list');
         feedbackList.innerHTML = '';
         results.forEach((res, i) => {
