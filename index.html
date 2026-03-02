@@ -51,19 +51,20 @@
         .img-main { max-width: 300px; border-radius: 15px; border: 2px solid #eee; }
         .input-large { width: 120px; height: 120px; font-size: 60px; text-align: center; border: 4px solid var(--blue); border-radius: 20px; outline: none; background: #fff9c4; }
         
-        .drag-source, .q13-drag-source { min-width: 100px; min-height: 120px; border: 2px dashed #e2e8f0; border-radius: 15px; padding: 10px; display: flex; gap: 10px; justify-content: center; }
-        .drag-item { width: 90px; height: 90px; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 40px; cursor: grab; border-radius: 15px; user-select: none; touch-action: none; }
-        .drop-target { width: 110px; height: 110px; border: 4px dashed #cbd5e0; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: #fafafa; }
+        /* Oppdaterte flyttbare elementer */
+        .drag-source, .q13-drag-source { min-width: 100px; min-height: 120px; border: 2px dashed #e2e8f0; border-radius: 15px; padding: 15px; display: flex; gap: 15px; justify-content: center; background: #f8fafc; }
+        .drag-item { width: 90px; height: 90px; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 45px; border-radius: 15px; user-select: none; touch-action: none; cursor: pointer; border: 4px solid transparent; transition: transform 0.2s; }
+        .drag-item.selected { border-color: gold; transform: scale(1.1); box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+        .drop-target, .drop-target-large { width: 110px; height: 110px; border: 4px dashed #cbd5e0; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: #fafafa; cursor: pointer; }
         
+        /* Oppgave 13 spesial-layout */
         .q13-container { display: flex; flex-direction: column; gap: 20px; align-items: center; width: 100%; }
-        .q13-grid { display: flex; flex-direction: row; gap: 10px; justify-content: center; align-items: center; }
-        .drag-img-large { width: 100px; height: 100px; cursor: grab; border: 2px solid #ddd; border-radius: 15px; object-fit: cover; background: white; touch-action: none;}
-        .drop-target-large { width: 110px; height: 110px; border: 3px dashed #cbd5e0; border-radius: 15px; display: flex; align-items: center; justify-content: center; background: #fdfdfd; }
-        .static-img-large { width: 110px; height: 110px; border: 3px solid #2d3748; border-radius: 15px; overflow: hidden; }
+        .q13-grid { display: flex; flex-direction: row; gap: 8px; justify-content: center; align-items: center; }
+        .drag-img-large { width: 100px; height: 100px; border: 2px solid #ddd; border-radius: 15px; object-fit: cover; background: white; touch-action: none; pointer-events: auto; }
+        .static-img-large { width: 105px; height: 105px; border: 3px solid #2d3748; border-radius: 15px; overflow: hidden; }
 
         .grid-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
-        .img-card { border: 4px solid #edf2f7; border-radius: 20px; padding: 10px; cursor: pointer; transition: 0.3s; background: white; display: flex; justify-content: center; align-items: center; }
-        .img-card img { max-width: 100%; max-height: 150px; border-radius: 10px; }
+        .img-card { border: 4px solid #edf2f7; border-radius: 20px; padding: 10px; cursor: pointer; background: white; display: flex; justify-content: center; align-items: center; }
         .img-card.selected { border-color: var(--green); background: #f0fff4; }
         
         .number-line-container { width: 90%; position: relative; height: 120px; margin: 60px auto; cursor: pointer; }
@@ -85,7 +86,6 @@
         #result-screen { display: none; text-align: center; }
         #feedback-list { text-align: left; max-width: 500px; margin: 20px auto; font-size: 20px; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch-polyfill@1.5.0/DragDropTouch.min.js"></script>
 </head>
 <body>
 
@@ -108,14 +108,14 @@
         <h2>Oppgave 3</h2>
         <div class="layout-flex" style="flex-direction: column;">
             <div id="q3-source" class="drag-source">
-                <div class="drag-item" draggable="true" id="q3_1">1</div>
-                <div class="drag-item" draggable="true" id="q3_2">2</div>
-                <div class="drag-item" draggable="true" id="q3_5">5</div>
-                <div class="drag-item" draggable="true" id="q3_9">9</div>
+                <div class="drag-item" draggable="true" id="q3_1" onclick="handleItemClick(this)">1</div>
+                <div class="drag-item" draggable="true" id="q3_2" onclick="handleItemClick(this)">2</div>
+                <div class="drag-item" draggable="true" id="q3_5" onclick="handleItemClick(this)">5</div>
+                <div class="drag-item" draggable="true" id="q3_9" onclick="handleItemClick(this)">9</div>
             </div>
-            <div style="display:flex; gap:20px; margin-top:20px">
-                <div class="drop-target" id="q3_d1"></div>
-                <div class="drop-target" id="q3_d2"></div>
+            <div style="display:flex; gap:25px; margin-top:20px">
+                <div class="drop-target" id="q3_d1" onclick="handleTargetClick(this)"></div>
+                <div class="drop-target" id="q3_d2" onclick="handleTargetClick(this)"></div>
             </div>
         </div>
     </div>
@@ -124,14 +124,14 @@
         <h2>Oppgave 4</h2>
         <div class="layout-flex" style="flex-direction: column;">
             <div id="q4-source" class="drag-source">
-                <div class="drag-item" draggable="true" id="q4_1">1</div>
-                <div class="drag-item" draggable="true" id="q4_3">3</div>
-                <div class="drag-item" draggable="true" id="q4_5">5</div>
-                <div class="drag-item" draggable="true" id="q4_7">7</div>
+                <div class="drag-item" draggable="true" id="q4_1" onclick="handleItemClick(this)">1</div>
+                <div class="drag-item" draggable="true" id="q4_3" onclick="handleItemClick(this)">3</div>
+                <div class="drag-item" draggable="true" id="q4_5" onclick="handleItemClick(this)">5</div>
+                <div class="drag-item" draggable="true" id="q4_7" onclick="handleItemClick(this)">7</div>
             </div>
-            <div style="display:flex; gap:20px; margin-top:20px">
-                <div class="drop-target" id="q4_d1"></div>
-                <div class="drop-target" id="q4_d2"></div>
+            <div style="display:flex; gap:25px; margin-top:20px">
+                <div class="drop-target" id="q4_d1" onclick="handleTargetClick(this)"></div>
+                <div class="drop-target" id="q4_d2" onclick="handleTargetClick(this)"></div>
             </div>
         </div>
     </div>
@@ -151,18 +151,18 @@
     <div class="question-box" id="q13">
         <h2>Oppgave 13</h2>
         <div class="q13-container">
-            <div id="source13" class="q13-drag-source">
-                <img src="13_01.png" class="drag-img-large" draggable="true" id="i13_1">
-                <img src="13_02.png" class="drag-img-large" draggable="true" id="i13_2">
-                <img src="13_03.png" class="drag-img-large" draggable="true" id="i13_3">
-                <img src="13_04.png" class="drag-img-large" draggable="true" id="i13_4">
+            <div id="source13" class="q13-drag-source" onclick="handleTargetClick(this)">
+                <img src="13_01.png" class="drag-item drag-img-large" draggable="true" id="i13_1" onclick="handleItemClick(this)">
+                <img src="13_02.png" class="drag-item drag-img-large" draggable="true" id="i13_2" onclick="handleItemClick(this)">
+                <img src="13_03.png" class="drag-item drag-img-large" draggable="true" id="i13_3" onclick="handleItemClick(this)">
+                <img src="13_04.png" class="drag-item drag-img-large" draggable="true" id="i13_4" onclick="handleItemClick(this)">
             </div>
             <div class="q13-grid">
                 <div class="static-img-large"><img src="13.png" style="width:100%; height:100%; object-fit:cover;"></div>
-                <div class="drop-target-large" id="d13_1"></div>
-                <div class="drop-target-large" id="d13_2"></div>
-                <div class="drop-target-large" id="d13_3"></div>
-                <div class="drop-target-large" id="d13_4"></div>
+                <div class="drop-target-large" id="d13_1" onclick="handleTargetClick(this)"></div>
+                <div class="drop-target-large" id="d13_2" onclick="handleTargetClick(this)"></div>
+                <div class="drop-target-large" id="d13_3" onclick="handleTargetClick(this)"></div>
+                <div class="drop-target-large" id="d13_4" onclick="handleTargetClick(this)"></div>
             </div>
         </div>
     </div>
@@ -191,19 +191,65 @@
     <button class="nav-arrow" onclick="changePage(-1)">◀</button>
     <div id="page-dots-container" style="display:flex; gap:8px;"></div>
     <button class="nav-arrow" onclick="changePage(1)">▶</button>
-    <button id="submit-btn" class="btn-submit" onclick="finishTest()">Lever oppgaven</button>
+    <button id="submit-btn" class="btn-submit" onclick="finishTest()">Lever</button>
 </div>
 
 <script>
     let currentPage = 1;
     const totalPages = 14;
     const arrowPositions = { 7: 0, 8: 0 };
+    let selectedId = null; // For iPad trykk-for-å-flytte
 
     function startQuiz() {
         document.getElementById('start-page').classList.add('hidden');
         document.getElementById('quiz-wrap').classList.remove('hidden');
         document.getElementById('main-nav').style.display = 'flex';
         init();
+    }
+
+    // IPAD TRYKK-LOGIKK
+    function handleItemClick(el) {
+        event.stopPropagation();
+        if (selectedId) {
+            document.getElementById(selectedId).classList.remove('selected');
+        }
+        if (selectedId === el.id) {
+            selectedId = null;
+        } else {
+            selectedId = el.id;
+            el.classList.add('selected');
+        }
+    }
+
+    function handleTargetClick(target) {
+        if (!selectedId) {
+            // Hvis man trykker på en boks med innhold uten å ha valgt noe, flytt det tilbake
+            if (target.children.length > 0 && target.id !== 'q3-source' && target.id !== 'q4-source' && target.id !== 'source13') {
+                returnToSource(target.children[0]);
+            }
+            return;
+        }
+        
+        const el = document.getElementById(selectedId);
+        
+        // Sjekk om målet er en boks (ikke kilden)
+        if (target.classList.contains('drop-target') || target.classList.contains('drop-target-large')) {
+            if (target.children.length > 0) returnToSource(target.children[0]);
+            target.appendChild(el);
+        } else {
+            returnToSource(el);
+        }
+        
+        el.classList.remove('selected');
+        selectedId = null;
+    }
+
+    function returnToSource(item) {
+        let source;
+        if (item.id.startsWith('i13')) source = document.getElementById('source13');
+        else if (item.id.startsWith('q3')) source = document.getElementById('q3-source');
+        else if (item.id.startsWith('q4')) source = document.getElementById('q4-source');
+        if (source) source.appendChild(item);
     }
 
     function init() {
@@ -222,18 +268,28 @@
         goToPage(1);
     }
 
-    function goToPage(n) {
-        if (n < 1 || n > totalPages) return;
-        document.querySelectorAll('.question-box').forEach(q => q.classList.remove('active'));
-        document.querySelectorAll('.page-dot').forEach(d => d.classList.remove('active'));
-        document.getElementById('q' + n).classList.add('active');
-        document.getElementById('dot-' + n).classList.add('active');
-        const audio = document.getElementById('audio-player');
-        audio.src = (n < 10 ? '0' + n : n) + '.mp3';
-        currentPage = n;
-        document.getElementById('submit-btn').style.display = (n === 14) ? 'block' : 'none';
-        window.scrollTo(0,0);
-    }
+function goToPage(n) {
+    if (n < 1 || n > totalPages) return;
+    if (selectedId) { document.getElementById(selectedId).classList.remove('selected'); selectedId = null; }
+    
+    document.querySelectorAll('.question-box').forEach(q => q.classList.remove('active'));
+    document.querySelectorAll('.page-dot').forEach(d => d.classList.remove('active'));
+    
+    document.getElementById('q' + n).classList.add('active');
+    document.getElementById('dot-' + n).classList.add('active');
+    
+    // Håndtering av lydspiller
+    const audioWrapper = document.querySelector('.audio-wrapper');
+    const audio = document.getElementById('audio-player');
+    
+    // Vis spilleren på oppgavene, men skjul den hvis vi er ferdige
+    audioWrapper.style.display = 'block'; 
+    audio.src = (n < 10 ? '0' + n : n) + '.mp3';
+    
+    currentPage = n;
+    document.getElementById('submit-btn').style.display = (n === 14) ? 'block' : 'none';
+    window.scrollTo(0,0);
+}
 
     function changePage(step) { goToPage(currentPage + step); }
 
@@ -264,6 +320,7 @@
         arrowPositions[id] = val;
     }
 
+    // Standard Drag & Drop support (for PC)
     document.addEventListener('dragstart', (e) => {
         if (e.target.draggable) e.dataTransfer.setData('text/plain', e.target.id);
     });
@@ -272,33 +329,22 @@
         e.preventDefault();
         const id = e.dataTransfer.getData('text/plain');
         const draggedElement = document.getElementById(id);
-        if (!draggedElement) return;
         const dropzone = e.target.closest('.drop-target, .drop-target-large, .drag-source, .q13-drag-source');
-        if (!dropzone) return;
-        
-        if (dropzone.classList.contains('drop-target') || dropzone.classList.contains('drop-target-large')) {
-            if (dropzone.children.length > 0) {
-                const existingItem = dropzone.children[0];
-                let returnTarget;
-                if (existingItem.id.startsWith('i13')) returnTarget = document.getElementById('source13');
-                else if (existingItem.id.startsWith('q3')) returnTarget = document.getElementById('q3-source');
-                else if (existingItem.id.startsWith('q4')) returnTarget = document.getElementById('q4-source');
-                if (returnTarget) returnTarget.appendChild(existingItem);
+        if (draggedElement && dropzone) {
+            if (dropzone.classList.contains('drop-target') || dropzone.classList.contains('drop-target-large')) {
+                if (dropzone.children.length > 0) returnToSource(dropzone.children[0]);
+                dropzone.appendChild(draggedElement);
+            } else {
+                returnToSource(draggedElement);
             }
-            dropzone.appendChild(draggedElement);
-        } else {
-            dropzone.appendChild(draggedElement);
         }
     });
 
     function toggleSelection(el) { el.classList.toggle('selected'); }
 
     function finishTest() {
-        const audio = document.getElementById('audio-player');
-        audio.pause();
         let score = 0;
         let summary = '<ul>';
-        
         const check = (num, cond) => {
             if (cond) { score++; summary += `<li>✅ Oppgave ${num}: Riktig</li>`; }
             else { summary += `<li style="color:red">❌ Oppgave ${num}: Feil</li>`; }
@@ -323,6 +369,8 @@
         check(14, document.querySelectorAll('#grid14 .selected').length === 3 && document.querySelectorAll('#correct14_1.selected, #correct14_5.selected, #correct14_6.selected').length === 3);
         
         summary += '</ul>';
+        // DENNE LINJEN SKJULER LYDEN PÅ SLUTTEN:
+        document.querySelector('.audio-wrapper').style.display = 'none';
         document.querySelectorAll('.question-box').forEach(e => e.classList.remove('active'));
         document.getElementById('main-nav').style.display = 'none';
         document.getElementById('result-screen').style.display = 'block';
