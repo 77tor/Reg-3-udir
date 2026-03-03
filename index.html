@@ -24,9 +24,10 @@
             align-items: center; 
             color: var(--text);
             touch-action: manipulation;
-            /* Hindrer at man ved et uhell markerer tekst/bilder ved hurtigklikking */
             user-select: none;
             -webkit-user-select: none;
+            /* Fjerner standard trykk-effekt i Safari */
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container { 
@@ -38,13 +39,15 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
             padding: 40px; 
             position: relative; 
-            margin-bottom: 150px; 
+            margin-bottom: 150px;
+            /* Tvinger nytt lag for innholdet */
+            isolation: isolate;
         }
 
         #start-page { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .welcome-box { background: #ebf5fb; border: 3px solid var(--blue); border-radius: 30px; padding: 30px; margin-top: 20px; width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
         
-        .btn-nav, .test-btn { background: var(--blue); color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; outline: none; }
+        .btn-nav, .test-btn { background: var(--blue); color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; outline: none; -webkit-tap-highlight-color: transparent; }
         .start-btn { background: var(--green); color: white; border: none; padding: 20px 50px; font-size: 32px; font-weight: bold; border-radius: 50px; cursor: pointer; margin-top: 10px; box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4); outline: none; }
 
         .audio-wrapper { position: absolute; top: 20px; right: 20px; background: #edf2f7; padding: 10px; border-radius: 50px; z-index: 100; }
@@ -61,6 +64,7 @@
             width: 120px; height: 120px; font-size: 60px; text-align: center; 
             border: 4px solid var(--blue); border-radius: 20px; outline: none; 
             background: var(--yellow); cursor: pointer; caret-color: transparent;
+            -webkit-appearance: none;
         }
         .input-large:focus { border-color: var(--green); background: white; box-shadow: 0 0 15px rgba(72,187,120,0.3); }
 
@@ -79,18 +83,30 @@
         .key:active { transform: translateY(2px); box-shadow: 0 2px 0 #9ca3af; }
         .key.delete { background: #feb2b2; color: #c53030; }
 
+        .img-card { 
+            border: 4px solid #edf2f7; border-radius: 20px; padding: 10px; cursor: pointer; 
+            background: white; transition: transform 0.2s, border-color 0.2s; 
+            outline: none !important; 
+            -webkit-tap-highlight-color: transparent;
+            /* Tvinger GPU-aksellerasjon for å unngå grafiske "spøkelser" */
+            will-change: transform;
+            position: relative;
+            z-index: 1;
+        }
+        .img-card.selected { 
+            border-color: var(--green) !important; 
+            background: #f0fff4; 
+            transform: scale(1.05); 
+            box-shadow: 0 0 15px rgba(72,187,120,0.3); 
+            z-index: 2;
+        }
+        .img-card img { max-width: 130px; height: auto; pointer-events: none; -webkit-user-drag: none; }
+
+        /* Resten av stilen beholdes */
         .drag-source, .q13-drag-source { min-height: 120px; border: 2px dashed #cbd5e0; padding: 15px; display: flex; gap: 15px; justify-content: center; border-radius: 15px; width: 100%; box-sizing: border-box; margin-bottom: 20px; background: #f8fafc; }
         .drag-item { width: 90px; height: 90px; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 45px; border-radius: 15px; cursor: pointer; touch-action: none; user-select: none; z-index: 100; }
         .drag-item-img { width: 90px; height: 90px; border-radius: 15px; cursor: pointer; touch-action: none; user-select: none; object-fit: cover; border: 2px solid var(--blue); background: white; }
         .drop-target, .drop-target-large { width: 110px; height: 110px; border: 4px dashed #cbd5e0; border-radius: 20px; display: flex; align-items: center; justify-content: center; background: #fafafa; }
-        
-        .img-card { 
-            border: 4px solid #edf2f7; border-radius: 20px; padding: 10px; cursor: pointer; 
-            background: white; transition: 0.2s; outline: none; -webkit-tap-highlight-color: transparent;
-        }
-        .img-card.selected { border-color: var(--green); background: #f0fff4; transform: scale(1.05); box-shadow: 0 0 15px rgba(72,187,120,0.3); }
-        .img-card img { max-width: 130px; height: auto; pointer-events: none; }
-
         .number-line-container { width: 90%; position: relative; height: 120px; margin: 50px auto; touch-action: none; cursor: pointer; }
         .line-base { width: 100%; height: 6px; background: #333; position: absolute; top: 50%; border-radius: 3px; }
         .tick { position: absolute; height: 25px; width: 3px; background: #333; top: 50%; transform: translateY(-50%); }
@@ -219,10 +235,14 @@
     function goToPage(n) {
         if (n < 1 || n > totalPages) return;
         
-        // FIKS FOR "SMITTING": Fjerner fokus fra alle elementer før vi bytter side
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
+        // KRITISK FIKS FOR NYESTE IOS: 
+        // 1. Fjern fokus fra alt
+        if (document.activeElement) document.activeElement.blur();
+        
+        // 2. Tving alle bildekort til å fjerne "fokus" og visuelle rester
+        document.querySelectorAll('.img-card').forEach(card => {
+            card.style.transform = card.classList.contains('selected') ? 'scale(1.05)' : 'scale(1)';
+        });
 
         document.querySelectorAll('.question-box').forEach(q => q.classList.remove('active'));
         document.querySelectorAll('.page-dot').forEach(d => d.classList.remove('active'));
@@ -314,7 +334,10 @@
 
     function toggleSelection(el) { 
         el.classList.toggle('selected');
-        // Fjerner fokus med en gang man klikker på et bildekort
+        // Ekstra sikkerhet: tvinger nettleseren til å tegne elementet på nytt
+        el.style.display = 'none';
+        el.offsetHeight; 
+        el.style.display = 'inline-block';
         el.blur(); 
     }
 
